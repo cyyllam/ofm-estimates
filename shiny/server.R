@@ -14,9 +14,7 @@ server <- function(input, output) {
   output$main_table <- renderReactable({
     t <- filter_data() %>% 
       select(-Filter)
-    # browser()
     cols <- str_subset(colnames(t), "\\d{4}")
-    # coldef_args <-  lapply(cols, function(x) noquote(paste0("`",x,"`", " = colDef(format = colFormat(separators = T))")))
 
     reactable(t,
               searchable = T,
@@ -24,6 +22,7 @@ server <- function(input, output) {
               columnGroups = list(
                 colGroup(name = "Year", columns = cols)
                 ),
+              defaultColDef = colDef(format = colFormat(separators = T)),
               columns = list(
                 Jurisdiction = colDef(minWidth = 260)  # overrides the default
               ),
