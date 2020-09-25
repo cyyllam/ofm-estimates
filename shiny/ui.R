@@ -10,6 +10,6 @@ fluidPage(
 
 
     home,
-    estimates
+    explore
   )
 )
