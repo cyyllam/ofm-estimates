@@ -18,7 +18,7 @@ tab_tabular <- tabPanel(
            radioButtons("tablr_report_type",
                         "Report Type",
                         choices = list("Total" = "Total", "Delta" = "Delta"), 
-                        selected = "Delta"),
+                        selected = "Total"),
           
            sliderInput("tablr_year", 
                        "Years",

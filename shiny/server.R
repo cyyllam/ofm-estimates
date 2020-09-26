@@ -3,26 +3,25 @@ server <- function(input, output) {
     years <- input$tablr_year
     id_cols <- c("Filter", "County", "Jurisdiction")
     
+    d <- df %>% 
+      arrange(year) %>% 
+      filter(attr == input$tablr_attr,
+             year %in% seq(min(years), max(years)))
+    
     if (input$tablr_report_type == "Total") {
-      t <- df %>% 
-        arrange(year) %>% 
-        filter(attr == input$tablr_attr,
-               year %in% seq(min(years), max(years))) %>% 
+      t <- d %>% 
         pivot_wider(id_cols = all_of(id_cols),
                     names_from = year)
-      return(t)
-    } else if (input$tablr_report_type == "Delta"){
-      t <- df %>% 
-        arrange(year) %>% 
-        filter(attr == input$tablr_attr,
-               year %in% seq(min(years), max(years))) %>% 
+    } else {
+      t <- d %>% 
         calc_delta() %>% 
         pivot_wider(id_cols = all_of(id_cols),
                     names_from = year,
                     values_from = delta) %>%
         ungroup()
-      return(t)
     }
+    
+    return(t)
   })
   
   output$main_table <- renderReactable({
@@ -31,7 +30,7 @@ server <- function(input, output) {
     cols <- str_subset(colnames(t), "\\d{4}")
 
     if (input$tablr_report_type == "Delta") {
-      # re-name column headers 
+      # re-name column headers
       cols_tail_full <- tail(cols, -1)
       cols_tail <- cols_tail_full %>% map(~ paste0("-", str_extract(.x, "\\d{2}$"))) %>% unlist
       new_cols_name <- head(cols, -1) %>% paste0(cols_tail)
@@ -48,7 +47,7 @@ server <- function(input, output) {
                 ),
               defaultColDef = colDef(format = colFormat(separators = T)),
               columns = list(
-                Jurisdiction = colDef(minWidth = 260)  # overrides the default
+                Jurisdiction = colDef(minWidth = 260) 
               ),
               )
 
