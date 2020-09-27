@@ -2,7 +2,7 @@ server <- function(input, output) {
   filter_data <- reactive({
     years <- input$tablr_year
     id_cols <- c("Filter", "County", "Jurisdiction")
-    
+
     d <- df %>% 
       arrange(year) %>% 
       filter(attr == input$tablr_attr,
@@ -24,11 +24,26 @@ server <- function(input, output) {
     return(t)
   })
   
-  output$main_table <- renderReactable({
+  output$ui_tablr_main_table <- renderUI({
+    display_note <- "Estimates other than Total Population are not yet available for years after 2010."
+    
+    if ((all(as.integer(input$tablr_year) > 2010) ) & (input$tablr_attr != "Total Population")) {
+      div(p(display_note))
+    } else if (any(as.integer(input$tablr_year) > 2010) & (input$tablr_attr != "Total Population")) {
+      div(
+        div(p(display_note)),
+        reactableOutput("tablr_main_table")
+      )
+    } else {
+      reactableOutput("tablr_main_table")
+    }
+  })
+  
+  output$tablr_main_table <- renderReactable({
     t <- filter_data() %>% select(!Filter)
     
     cols <- str_subset(colnames(t), "\\d{4}")
-
+    
     if (input$tablr_report_type == "Delta") {
       # re-name column headers
       cols_tail_full <- tail(cols, -1)
@@ -39,17 +54,20 @@ server <- function(input, output) {
       cols <- c(cols[1], new_cols_name)
     }
     
-    reactable(t,
-              searchable = T,
-              # defaultPageSize = ,
-              columnGroups = list(
-                colGroup(name = "Year", columns = cols)
+    if (nrow(t) > 0) {
+      reactable(t,
+                searchable = T,
+                # defaultPageSize = ,
+                columnGroups = list(
+                  colGroup(name = "Year", columns = cols)
                 ),
-              defaultColDef = colDef(format = colFormat(separators = T)),
-              columns = list(
-                Jurisdiction = colDef(minWidth = 260) 
-              ),
-              )
-
+                defaultColDef = colDef(format = colFormat(separators = T)),
+                columns = list(
+                  Jurisdiction = colDef(minWidth = 260) 
+                ),
+      )
+    }
   })
+  
+ 
 }

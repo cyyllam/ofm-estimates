@@ -6,31 +6,31 @@ attr_list <- list(
   "Households" = "Occupied Housing"
 )
 years <- unique(df$year)
+
 tab_tabular <- tabPanel(
   title = "Tables",
   value = "tablr",
   fluidRow(
     column(width = 3,
            selectInput("tablr_attr", 
-                       label = "Dataset", 
+                       "Dataset", 
                        choices = attr_list,
                        selected = "Total Population"),
            radioButtons("tablr_report_type",
                         "Report Type",
                         choices = list("Total" = "Total", "Delta" = "Delta"), 
                         selected = "Total"),
-          
            sliderInput("tablr_year", 
                        "Years",
                        min = as.numeric(min(years)), 
                        max = as.numeric(max(years)),
                        step = 1,
                        sep = "",
-                       value = c(2017, as.numeric(max(years)))
+                       value = c(as.numeric(max(years))-3, as.numeric(max(years)))
                        )
     ),
     column(width = 9,
-           reactableOutput("main_table")
+           uiOutput("ui_tablr_main_table")
     )
     ) # end fluidRow
 )
