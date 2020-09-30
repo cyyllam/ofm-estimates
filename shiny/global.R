@@ -1,5 +1,6 @@
 library(shiny)
 library(reactable)
+library(sparkline)
 library(here)
 
 source(here("functions", "functions.R"))

@@ -6,12 +6,22 @@ server <- function(input, output) {
     d <- df %>% 
       arrange(year) %>% 
       filter(attr == input$tablr_attr,
-             year %in% seq(min(years), max(years)))
+             year %in% seq(min(years), max(years))) 
+
+    if (!is.null(input$tablr_county)) { 
+      cnty_filter <- input$tablr_county
+      d <- d %>% filter(County %in% cnty_filter)
+    } 
     
+    if (input$tablr_juris %in% c(1:4)) {
+      d <- d %>% filter(Filter == input$tablr_juris )
+    }
+
     if (input$tablr_report_type == "Total") {
       t <- d %>% 
         pivot_wider(id_cols = all_of(id_cols),
                     names_from = year)
+      browser()
     } else {
       t <- d %>% 
         calc_delta() %>% 
@@ -20,6 +30,17 @@ server <- function(input, output) {
                     values_from = delta) %>%
         ungroup()
     }
+
+    sparkline_data <- t %>% 
+      pivot_longer(!id_cols,
+                   names_to = "year",
+                   values_to = "value") %>% 
+      group_by(County, Jurisdiction) %>% 
+      summarise(Trendline = list(value), .groups = "keep")
+    
+    t <- t %>% 
+      left_join(sparkline_data, by = c("County", "Jurisdiction")) %>% 
+      select(id_cols, Trendline, everything())
     
     return(t)
   })
@@ -40,7 +61,8 @@ server <- function(input, output) {
   })
   
   output$tablr_main_table <- renderReactable({
-    t <- filter_data() %>% select(!Filter)
+    t <- filter_data() %>% 
+      select(!Filter)
     
     cols <- str_subset(colnames(t), "\\d{4}")
     
@@ -57,14 +79,19 @@ server <- function(input, output) {
     if (nrow(t) > 0) {
       reactable(t,
                 searchable = T,
-                # defaultPageSize = ,
+                defaultPageSize = 20,
                 columnGroups = list(
                   colGroup(name = "Year", columns = cols)
                 ),
                 defaultColDef = colDef(format = colFormat(separators = T)),
                 columns = list(
-                  Jurisdiction = colDef(minWidth = 260) 
-                ),
+                  Jurisdiction = colDef(minWidth = 150),
+                  Trendline = colDef(
+                    cell = function(values) {
+                      sparkline(values, type = "bar")
+                    }
+                  )
+                )
       )
     }
   })
