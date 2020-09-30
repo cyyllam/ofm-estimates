@@ -22,9 +22,9 @@ compile_postcensal_data <- function(filename) {
 clean_intercensal_sheet <- function(filename, sheetname) {
   # munge intercensal data from a single sheet
   # one sheet covers one attribute
-  lookup <- read_excel(here("data", "lookup.xlsx")) %>% 
+  lookup <- read_excel(here("data", "lookup.xlsx")) %>%
     mutate(across("Filter", as.numeric))
-  
+    
   rdf <- read_excel(here("data", filename), sheet = sheetname)
   
   est_cols <- str_subset(colnames(rdf), "^\\d+")
@@ -75,6 +75,6 @@ calc_delta <- function(table) {
 # df <- compile_postcensal_data("ofm_april1_population_final.xlsx")
 # df_delta <- calc_delta(df)
 
-# df <- compile_intercensal_data('ofm_april1_intercensal_estimates_2000-2010.xlsx')  
+# df <- compile_intercensal_data('ofm_april1_intercensal_estimates_2000-2010.xlsx')
 # df_delta <- calc_delta(df)
   

@@ -1,9 +1,8 @@
 library(shiny)
-library(reactable)
-library(sparkline)
 library(here)
 
 source(here("functions", "functions.R"))
+source(here("functions", "reactable_functions.R"))
 
 # generate data
 post_censal_file <-"ofm_april1_population_final.xlsx"

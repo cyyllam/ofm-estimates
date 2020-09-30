@@ -1,4 +1,14 @@
-server <- function(input, output) {
+server <- function(input, output, session) {
+  observeEvent(!(input$tablr_juris %in% c(4,5)), {
+    updateCheckboxGroupInput(session, 
+                             "tablr_county",  
+                             choices = list("King" = "King",
+                                            "Kitsap" = "Kitsap",
+                                            "Pierce" = "Pierce",
+                                            "Snohomish" = "Snohomish"),
+                             selected=NULL)
+  })
+  
   filter_data <- reactive({
     years <- input$tablr_year
     id_cols <- c("Filter", "County", "Jurisdiction")
@@ -14,14 +24,13 @@ server <- function(input, output) {
     } 
     
     if (input$tablr_juris %in% c(1:4)) {
-      d <- d %>% filter(Filter == input$tablr_juris )
+      d <- d %>% filter(Filter == input$tablr_juris)
     }
 
     if (input$tablr_report_type == "Total") {
       t <- d %>% 
         pivot_wider(id_cols = all_of(id_cols),
                     names_from = year)
-      browser()
     } else {
       t <- d %>% 
         calc_delta() %>% 
@@ -76,6 +85,12 @@ server <- function(input, output) {
       cols <- c(cols[1], new_cols_name)
     }
     
+    footer_name <- switch(input$tablr_juris, 
+                          "1"= "Region", 
+                          "2" = "Unincorporated Region",
+                          "3" = "Incorporated Region"
+                          )
+    
     if (nrow(t) > 0) {
       reactable(t,
                 searchable = T,
@@ -83,17 +98,17 @@ server <- function(input, output) {
                 columnGroups = list(
                   colGroup(name = "Year", columns = cols)
                 ),
-                defaultColDef = colDef(format = colFormat(separators = T)),
-                columns = list(
-                  Jurisdiction = colDef(minWidth = 150),
-                  Trendline = colDef(
-                    cell = function(values) {
-                      sparkline(values, type = "bar")
-                    }
-                  )
-                )
+                defaultColDef = colDef(format = colFormat(separators = T),
+                                       footer = function(values) {
+                                         if (!is.numeric(values)) return(NULL)
+                                         if (input$tablr_juris == 4 | input$tablr_juris == "All") return(NULL)
+                                         format(sum(values), big.mark = ",")
+                                       },
+                ),
+                columns = reactable_col_def(footer_name)
       )
     }
+    
   })
   
  
