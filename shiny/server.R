@@ -1,12 +1,13 @@
 server <- function(input, output, session) {
   observeEvent(!(input$tablr_juris %in% c(4,5)), {
+    # clear county checkboxes if user clicks on the county related summaries
     updateCheckboxGroupInput(session, 
                              "tablr_county",  
                              choices = list("King" = "King",
                                             "Kitsap" = "Kitsap",
                                             "Pierce" = "Pierce",
                                             "Snohomish" = "Snohomish"),
-                             selected=NULL)
+                             selected = NULL)
   })
   
   filter_data <- reactive({
@@ -39,17 +40,27 @@ server <- function(input, output, session) {
                     values_from = delta) %>%
         ungroup()
     }
-
-    sparkline_data <- t %>% 
-      pivot_longer(!id_cols,
-                   names_to = "year",
-                   values_to = "value") %>% 
-      group_by(County, Jurisdiction) %>% 
-      summarise(Trendline = list(value), .groups = "keep")
     
+    # create list column Trendline for sparkline htmlwidget
     t <- t %>% 
-      left_join(sparkline_data, by = c("County", "Jurisdiction")) %>% 
-      select(id_cols, Trendline, everything())
+      mutate(Trendline = pmap(unname(.[str_subset(colnames(.), "\\d{4}")]), c)) %>% 
+      select(all_of(id_cols), Trendline, everything())
+    
+    footer_name <- switch(input$tablr_juris, 
+                          "1"= "Region", 
+                          "2" = "Unincorporated Region",
+                          "3" = "Incorporated Region"
+    )
+    
+    if (!(input$tablr_juris %in% c(4, 5))) {
+      # add total summary line if county related summary
+      sum_cols <- str_subset(colnames(t), "\\d{4}")
+      b <- t %>% 
+        summarise(across(all_of(sum_cols), sum)) %>% 
+        mutate(Trendline = pmap(unname(.[str_subset(colnames(.), "\\d{4}")]), c),
+               Jurisdiction = footer_name)
+      t <- bind_rows(t, b)
+    }
     
     return(t)
   })
@@ -85,31 +96,16 @@ server <- function(input, output, session) {
       cols <- c(cols[1], new_cols_name)
     }
     
-    footer_name <- switch(input$tablr_juris, 
-                          "1"= "Region", 
-                          "2" = "Unincorporated Region",
-                          "3" = "Incorporated Region"
-                          )
-    
     if (nrow(t) > 0) {
       reactable(t,
                 searchable = T,
                 defaultPageSize = 20,
                 columnGroups = list(
-                  colGroup(name = "Year", columns = cols)
-                ),
-                defaultColDef = colDef(format = colFormat(separators = T),
-                                       footer = function(values) {
-                                         if (!is.numeric(values)) return(NULL)
-                                         if (input$tablr_juris == 4 | input$tablr_juris == "All") return(NULL)
-                                         format(sum(values), big.mark = ",")
-                                       },
-                ),
-                columns = reactable_col_def(footer_name)
+                  colGroup(name = "Year", columns = cols)),
+                defaultColDef = colDef(format = colFormat(separators = T)),
+                columns = reactable_col_def()
       )
     }
-    
   })
   
- 
 }

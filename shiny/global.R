@@ -1,8 +1,8 @@
 library(shiny)
 library(here)
 
-source(here("functions", "functions.R"))
-source(here("functions", "reactable_functions.R"))
+source_files <- list.files(path = "../functions", full.names = T, recursive = T)
+suppressMessages(lapply(source_files, source))
 
 # generate data
 post_censal_file <-"ofm_april1_population_final.xlsx"
