@@ -103,7 +103,17 @@ server <- function(input, output, session) {
                 columnGroups = list(
                   colGroup(name = "Year", columns = cols)),
                 defaultColDef = colDef(format = colFormat(separators = T)),
-                columns = reactable_col_def()
+                columns = reactable_col_def(),
+                rowStyle = JS("
+                function(rowInfo, state) {
+                  let d = state.data
+                  let e = d[d.length-1];
+                  let str = e.Jurisdiction;
+
+                  if (str.includes('Region') & (state.data.length-1 == rowInfo.index)) {
+                    return {fontWeight: 'bold'}
+                  }
+                }")
       )
     }
   })

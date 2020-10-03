@@ -28,7 +28,7 @@ tab_tabular <- tabPanel(
                                        "Incorporated Only" = 3,
                                        "Cities Only" = 4),
                         selected = 1),
-           conditionalPanel("input.tablr_juris == 'All' | input.tablr_juris == 4",
+           conditionalPanel("input.tablr_juris == 5 | input.tablr_juris == 4",
              checkboxGroupInput("tablr_county",
                                 "County",
                                 choices = list("King" = "King",
