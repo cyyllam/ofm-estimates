@@ -1,7 +1,7 @@
 library(reactable)
 library(sparkline)
 
-reactable_col_def <- function() {
+reactable_specific_col_def <- function() {
   custom_colDef <- list(
     Jurisdiction = colDef(minWidth = 150),
     Trendline = colDef(
@@ -10,4 +10,13 @@ reactable_col_def <- function() {
       }
     )
   )
+}
+
+default_col_def <- function(format_type) {
+  if (format_type == "number") {
+    return(colDef(format = colFormat(separators = T)))
+  } else if (format_type == "percent") {
+    return(colDef(format = colFormat(percent = TRUE, digits = 1)))
+  }
+  
 }

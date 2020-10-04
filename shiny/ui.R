@@ -1,4 +1,8 @@
 fluidPage(
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet.css")
+  ),
+  
   navbarPage(
     title = "OFM Estimates",
     id = "navbar",

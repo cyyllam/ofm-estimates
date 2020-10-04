@@ -22,10 +22,15 @@ compile_postcensal_data <- function(filename) {
 clean_intercensal_sheet <- function(filename, sheetname) {
   # munge intercensal data from a single sheet
   # one sheet covers one attribute
+  # lookup <- read_excel(here("data", "lookup.xlsx")) %>%
+  #   mutate(across("Filter", as.numeric))
   lookup <- read_excel(here("data", "lookup.xlsx")) %>%
+    drop_na(inter_county_name) %>% 
     mutate(across("Filter", as.numeric))
     
-  rdf <- read_excel(here("data", filename), sheet = sheetname)
+  # rdf <- read_excel(here("data", filename), sheet = sheetname)
+  rdf <- read_excel(here("data", filename), sheet = sheetname) %>% 
+    drop_na(Filter)
   
   est_cols <- str_subset(colnames(rdf), "^\\d+")
   id_cols <- c("Filter", "County Name", "City Name", "Jurisdiction")
@@ -69,11 +74,20 @@ calc_delta <- function(table) {
     mutate(delta = ifelse(is.na(delta), 0, delta))
 }
 
+calc_delta_share <- function(table) {
+  # calculate delta share of estimate years from a compiled table
+  df_delta_perc <- table %>% 
+    calc_delta() %>% 
+    mutate(delta_share = delta/lag(value))%>%
+    mutate(delta_share = ifelse(is.na(delta_share), 0, delta_share))
+}
+
 # Test f(x) ---------------------------------------------------------------
 
 
 # df <- compile_postcensal_data("ofm_april1_population_final.xlsx")
 # df_delta <- calc_delta(df)
+# df_delta_share <- calc_delta_share(df)
 
 # df <- compile_intercensal_data('ofm_april1_intercensal_estimates_2000-2010.xlsx')
 # df_delta <- calc_delta(df)

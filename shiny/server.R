@@ -32,20 +32,28 @@ server <- function(input, output, session) {
       t <- d %>% 
         pivot_wider(id_cols = all_of(id_cols),
                     names_from = year)
-    } else {
+    } else if (input$tablr_report_type == "Delta"){
       t <- d %>% 
         calc_delta() %>% 
         pivot_wider(id_cols = all_of(id_cols),
                     names_from = year,
                     values_from = delta) %>%
         ungroup()
+    } else {
+      t <- d %>% 
+        calc_delta_share() %>%
+        pivot_wider(id_cols = all_of(id_cols),
+                    names_from = year,
+                    values_from = delta_share) %>% 
+        ungroup()
     }
+    # browser()
     
     # create list column Trendline for sparkline htmlwidget
     t <- t %>% 
       mutate(Trendline = pmap(unname(.[str_subset(colnames(.), "\\d{4}")]), c)) %>% 
       select(all_of(id_cols), Trendline, everything())
-    
+
     footer_name <- switch(input$tablr_juris, 
                           "1"= "Region", 
                           "2" = "Unincorporated Region",
@@ -86,7 +94,7 @@ server <- function(input, output, session) {
     
     cols <- str_subset(colnames(t), "\\d{4}")
     
-    if (input$tablr_report_type == "Delta") {
+    if (input$tablr_report_type %in% c("Delta", "Delta Percent")) {
       # re-name column headers
       cols_tail_full <- tail(cols, -1)
       cols_tail <- cols_tail_full %>% map(~ paste0("-", str_extract(.x, "\\d{2}$"))) %>% unlist
@@ -96,14 +104,21 @@ server <- function(input, output, session) {
       cols <- c(cols[1], new_cols_name)
     }
     
+    if (input$tablr_report_type == "Delta Percent") {
+      def_col_form <- default_col_def("percent")
+    } else {
+      def_col_form <- default_col_def("number")
+    }
+    
+   
     if (nrow(t) > 0) {
       reactable(t,
                 searchable = T,
                 defaultPageSize = 20,
                 columnGroups = list(
                   colGroup(name = "Year", columns = cols)),
-                defaultColDef = colDef(format = colFormat(separators = T)),
-                columns = reactable_col_def(),
+                defaultColDef = def_col_form,
+                columns = reactable_specific_col_def(),
                 rowStyle = JS("
                 function(rowInfo, state) {
                   let d = state.data
