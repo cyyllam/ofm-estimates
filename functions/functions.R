@@ -82,6 +82,17 @@ calc_delta_share <- function(table) {
     mutate(delta_share = ifelse(is.na(delta_share), 0, delta_share))
 }
 
+create_annual_delta_headers <- function(table) {
+  cols <- str_subset(colnames(table), "\\d{4}")
+  
+  # re-name column headers
+  cols_tail_full <- tail(cols, -1)
+  cols_tail <- cols_tail_full %>% map(~ paste0("-", str_extract(.x, "\\d{2}$"))) %>% unlist()
+  new_cols_name <- head(cols, -1) %>% paste0(cols_tail)
+  names(cols_tail_full) <- new_cols_name
+  return(cols_tail_full)
+}
+
 # Test f(x) ---------------------------------------------------------------
 
 

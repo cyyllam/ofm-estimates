@@ -27,6 +27,26 @@ server <- function(input, output, session) {
     if (input$tablr_juris %in% c(1:4)) {
       d <- d %>% filter(Filter == input$tablr_juris)
     }
+    
+    if (input$tablr_juris %in% c(4, 5) & input$tablr_city_combine) {
+      d_part_a <- d %>% filter(Jurisdiction %in% str_subset(Jurisdiction, "(part)"))
+
+      suppressWarnings(d_part_b <- d %>% 
+        filter(Jurisdiction %in% str_subset(Jurisdiction, "(part)")) %>% 
+        group_by(Filter, Jurisdiction, year, attr) %>% 
+        summarise(value = sum(value), County = list(County)) %>% 
+        mutate(Jurisdiction = str_extract(Jurisdiction, "^\\w+"),
+               County = str_extract(County, '"(\\w+".*"\\w+)"'),
+               County = str_replace_all(County, c('"' = "",
+                                                  ',' = "-",
+                                                  ' ' = ''))
+        ))
+      
+      d <- d %>% 
+        anti_join(d_part_a) %>% 
+        bind_rows(d_part_b) %>% 
+        arrange(Jurisdiction, County)
+    }
 
     if (input$tablr_report_type == "Total") {
       t <- d %>% 
@@ -47,7 +67,6 @@ server <- function(input, output, session) {
                     values_from = delta_share) %>% 
         ungroup()
     }
-    # browser()
     
     # create list column Trendline for sparkline htmlwidget
     t <- t %>% 
@@ -95,13 +114,10 @@ server <- function(input, output, session) {
     cols <- str_subset(colnames(t), "\\d{4}")
     
     if (input$tablr_report_type %in% c("Delta", "Delta Percent")) {
-      # re-name column headers
-      cols_tail_full <- tail(cols, -1)
-      cols_tail <- cols_tail_full %>% map(~ paste0("-", str_extract(.x, "\\d{2}$"))) %>% unlist
-      new_cols_name <- head(cols, -1) %>% paste0(cols_tail)
-      names(cols_tail_full) <- new_cols_name
-      t <- t %>% rename(!!!cols_tail_full)
-      cols <- c(cols[1], new_cols_name)
+      # # re-name column headers
+      new_cols_name <- create_annual_delta_headers(t) 
+      t <- t %>% rename(!!!new_cols_name)
+      cols <- c(cols[1], str_subset(colnames(t), "\\-"))
     }
     
     if (input$tablr_report_type == "Delta Percent") {
@@ -110,7 +126,6 @@ server <- function(input, output, session) {
       def_col_form <- default_col_def("number")
     }
     
-   
     if (nrow(t) > 0) {
       reactable(t,
                 searchable = T,
