@@ -1,7 +1,7 @@
-fluidPage(
-  tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet.css")
-  ),
+fluidPage(theme = "stylesheet.css",
+  # tags$head(
+  #   tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet.css")
+  # ),
   
   navbarPage(
     title = "OFM Estimates",

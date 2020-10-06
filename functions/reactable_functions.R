@@ -3,8 +3,10 @@ library(sparkline)
 
 rt_specific_col_def <- function() {
   custom_colDef <- list(
-    Jurisdiction = colDef(minWidth = 150),
+    County = colDef(align = "left"),
+    Jurisdiction = colDef(align = "left", minWidth = 150),
     Trendline = colDef(
+      align = 'left',
       cell = function(values) {
         sparkline(values, type = "bar")
       }
@@ -27,7 +29,7 @@ rt_default_col_def <- function(table, format_type, add_style_top_ten = F) {
   }
   
   if (add_style_top_ten == T) {
-    return(colDef(format = frmt,
+    return(colDef(align = 'center',
                   cell = function(value, index, name) {
                     x <- head(sort(unlist(table[[name]]), decreasing = T), 10)
                     if (format_type == "number") {
@@ -37,7 +39,7 @@ rt_default_col_def <- function(table, format_type, add_style_top_ten = F) {
                     }
                     
                     if (is.numeric(value) && value != 0 && value %in% x) {
-                      div(class = 'sub-cell', frmt)
+                      div(class = "sub-cell", frmt)
                     } else if (is.numeric(value)){
                       frmt
                     } else {
