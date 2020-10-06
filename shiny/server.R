@@ -8,6 +8,10 @@ server <- function(input, output, session) {
                                             "Pierce" = "Pierce",
                                             "Snohomish" = "Snohomish"),
                              selected = NULL)
+    
+    updateCheckboxInput(session,
+                        "tablr_city_combine",
+                        value = F)
   })
   
   filter_data <- reactive({
@@ -19,11 +23,6 @@ server <- function(input, output, session) {
       filter(attr == input$tablr_attr,
              year %in% seq(min(years), max(years))) 
 
-    if (!is.null(input$tablr_county)) { 
-      cnty_filter <- input$tablr_county
-      d <- d %>% filter(County %in% cnty_filter)
-    } 
-    
     if (input$tablr_juris %in% c(1:4)) {
       d <- d %>% filter(Filter == input$tablr_juris)
     }
@@ -46,6 +45,17 @@ server <- function(input, output, session) {
         anti_join(d_part_a) %>% 
         bind_rows(d_part_b) %>% 
         arrange(Jurisdiction, County)
+    }
+    
+    if (!is.null(input$tablr_county)) {
+      if (input$tablr_county %in% "King") {
+        cnty_filter <- c("King", "King-Pierce", "King-Snohomish")
+      } else if (input$tablr_county == "Pierce") {
+        cnty_filter <- c("Pierce", "King-Pierce")
+      } else if (input$tablr_county == "Snohomish") {
+        cnty_filter <- c("Snohomish", "King-Snohomish")
+      }
+        d <- d %>% filter(County %in% cnty_filter)
     }
 
     if (input$tablr_report_type == "Total") {
@@ -107,6 +117,10 @@ server <- function(input, output, session) {
     }
   })
   
+
+# Render ------------------------------------------------------------------
+
+  
   output$tablr_main_table <- renderReactable({
     t <- filter_data() %>% 
       select(!Filter)
@@ -120,12 +134,21 @@ server <- function(input, output, session) {
       cols <- c(cols[1], str_subset(colnames(t), "\\-"))
     }
     
-    if (input$tablr_report_type == "Delta Percent") {
-      def_col_form <- default_col_def("percent")
+    if (input$tablr_juris == 4) {
+      if (input$tablr_report_type == "Delta Percent") {
+        def_col_form <- rt_default_col_def(t, "percent", add_style_top_ten = T)
+      } else {
+        def_col_form <- rt_default_col_def(t, "number", add_style_top_ten = T)
+      }
     } else {
-      def_col_form <- default_col_def("number")
+      if (input$tablr_report_type == "Delta Percent") {
+        def_col_form <- rt_default_col_def(t, "percent")
+      } else {
+        def_col_form <- rt_default_col_def(t, "number")
+      }
+      
     }
-    
+
     if (nrow(t) > 0) {
       reactable(t,
                 searchable = T,
@@ -133,7 +156,7 @@ server <- function(input, output, session) {
                 columnGroups = list(
                   colGroup(name = "Year", columns = cols)),
                 defaultColDef = def_col_form,
-                columns = reactable_specific_col_def(),
+                columns = rt_specific_col_def(),
                 rowStyle = JS("
                 function(rowInfo, state) {
                   let d = state.data
