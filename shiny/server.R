@@ -17,7 +17,7 @@ server <- function(input, output, session) {
   filter_data <- reactive({
     years <- input$tablr_year
     id_cols <- c("Filter", "County", "Jurisdiction")
-
+    
     d <- df %>% 
       arrange(year) %>% 
       filter(attr == input$tablr_attr,
@@ -83,13 +83,13 @@ server <- function(input, output, session) {
       mutate(Trendline = pmap(unname(.[str_subset(colnames(.), "\\d{4}")]), c)) %>% 
       select(all_of(id_cols), Trendline, everything())
 
-    footer_name <- switch(input$tablr_juris, 
-                          "1"= "Region", 
-                          "2" = "Unincorporated Region",
-                          "3" = "Incorporated Region"
-    )
-    
-    if (!(input$tablr_juris %in% c(4, 5))) {
+    if (!(input$tablr_juris %in% c(4, 5)) & (nrow(t) > 0)) {
+      footer_name <- switch(input$tablr_juris, 
+                            "1"= "Region", 
+                            "2" = "Unincorporated Region",
+                            "3" = "Incorporated Region"
+      )
+      
       # add total summary line if county related summary
       sum_cols <- str_subset(colnames(t), "\\d{4}")
       b <- t %>% 
@@ -101,15 +101,18 @@ server <- function(input, output, session) {
     
     return(t)
   })
+
+# Render UI ---------------------------------------------------------------
+
   
   output$ui_tablr_main_table <- renderUI({
     display_note <- "Estimates other than Total Population are not yet available for years after 2010."
     
     if ((all(as.integer(input$tablr_year) > 2010) ) & (input$tablr_attr != "Total Population")) {
-      div(p(display_note))
+      div(p(display_note), class = "note")
     } else if (any(as.integer(input$tablr_year) > 2010) & (input$tablr_attr != "Total Population")) {
       div(
-        div(p(display_note)),
+        div(p(display_note), class = "note"),
         reactableOutput("tablr_main_table")
       )
     } else {
@@ -122,6 +125,8 @@ server <- function(input, output, session) {
 
   
   output$tablr_main_table <- renderReactable({
+    if (is.null(filter_data())) return(NULL)
+    
     t <- filter_data() %>% 
       select(!Filter)
     
