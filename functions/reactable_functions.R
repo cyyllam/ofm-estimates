@@ -19,7 +19,7 @@ make_color_pal <- function(colors, bias = 1) {
   function(x) rgb(get_color(x), maxColorValue = 255)
 }
 
-top_ten_color <- make_color_pal(c("#ffe4b2","#ffc966", "#ffa500"), bias = 5)
+top_ten_color <- make_color_pal(c("#ffe4b2","#ffc966", "#e59400"), bias = 5)
 
 rt_default_col_def <- function(table, format_type, add_style_top_ten = F) {
   if (format_type == "number") {

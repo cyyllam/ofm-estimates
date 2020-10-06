@@ -55,7 +55,7 @@ server <- function(input, output, session) {
       } else if (input$tablr_county == "Snohomish") {
         cnty_filter <- c("Snohomish", "King-Snohomish")
       }
-        d <- d %>% filter(County %in% cnty_filter)
+        d <- d %>% filter(County %in% input$tablr_county)
     }
 
     if (input$tablr_report_type == "Total") {
