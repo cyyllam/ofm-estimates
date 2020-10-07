@@ -179,7 +179,11 @@ server <- function(input, output, session) {
       } else {
         def_col_form <- rt_default_col_def(t, "number")
       }
-      
+    }
+    
+    if (input$tablr_report_type != "Total") {
+      t <- t %>% select(everything(), -c(4))
+      cols <- cols[2:length(cols)]
     }
 
     if (nrow(t) > 0) {
