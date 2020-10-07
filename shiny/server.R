@@ -181,7 +181,7 @@ server <- function(input, output, session) {
       }
     }
     
-    if (input$tablr_report_type != "Total") {
+    if (input$tablr_report_type != "Total" & (ncol(t) > 4)) {
       t <- t %>% select(everything(), -c(4))
       cols <- cols[2:length(cols)]
     }
