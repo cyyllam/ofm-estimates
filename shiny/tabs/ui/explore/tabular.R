@@ -8,7 +8,7 @@ attr_list <- list(
 years <- unique(df$year)
 
 tab_tabular <- tabPanel(
-  title = "Tables",
+  title = "Table",
   value = "tablr",
   div(class = "main",
     fluidRow(

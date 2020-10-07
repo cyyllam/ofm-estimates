@@ -36,7 +36,7 @@ rt_default_col_def <- function(table, format_type, add_style_top_ten = F) {
                     if (format_type == "number") {
                       frmt <- format(value, big.mark=",")
                     } else if (format_type == "percent") {
-                      frmt <-  formatC(paste0(round(as.numeric(value) * 100, 1), "%"))
+                      frmt <-  suppressWarnings(formatC(paste0(round(as.numeric(value) * 100, 1), "%")))
                     }
                     
                     if (is.numeric(value) && value != 0 && value %in% x) {

@@ -10,6 +10,10 @@
   border-radius: 10px;
 }
 
+.long-note {
+  text-align: left;
+}
+
 .sub-cell {
   /*font-weight: 700;*/
   margin: auto 20%;

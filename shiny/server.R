@@ -107,19 +107,47 @@ server <- function(input, output, session) {
   
   output$ui_tablr_main_table <- renderUI({
     display_note <- "Estimates other than Total Population are not yet available for years after 2010."
+    cities_note <- "Circles denote cities that rank in the top ten (of filtered results) for 
+    growth or absolute total. The top ten cities in decending order for a given year will have a hue progressing from dark to light."
     
-    if ((all(as.integer(input$tablr_year) > 2010) ) & (input$tablr_attr != "Total Population")) {
-      div(p(display_note), class = "note")
-    } else if (any(as.integer(input$tablr_year) > 2010) & (input$tablr_attr != "Total Population")) {
+    crit_a <- any(as.integer(input$tablr_year) > 2010) & (input$tablr_attr != "Total Population")
+    crit_b <- all(as.integer(input$tablr_year) > 2010) & (input$tablr_attr != "Total Population")
+    
+    disp_note_div <- p(display_note, class = "note")
+    city_note_div <- p(cities_note, class = "long-note")
+    
+    if (input$tablr_juris == 4) {
+      
+      if (crit_b) {
+        disp_note_div
+      } else if (crit_a) {
+        div(
+          div(p(display_note, class = "long-note"), city_note_div, class = "note"),
+          reactableOutput("tablr_main_table")
+        )
+      } else {
+        div(
+          div(city_note_div, class = "note"),
+          reactableOutput("tablr_main_table")
+        )
+      }
+      
+    } else if (crit_b) {
+      
+      disp_note_div
+      
+    } else if (crit_a) {
+      
       div(
-        div(p(display_note), class = "note"),
+        disp_note_div,
         reactableOutput("tablr_main_table")
       )
+      
     } else {
       reactableOutput("tablr_main_table")
     }
   })
-  
+
 
 # Render ------------------------------------------------------------------
 

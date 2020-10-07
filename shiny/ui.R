@@ -4,7 +4,7 @@ fluidPage(#theme = "stylesheet.css",
   ),
   
   navbarPage(
-    title = "OFM Estimates",
+    title = "OFM Estimates for the Central Puget Sound Region",
     id = "navbar",
     selected = "home",
     # theme = "style.css",
