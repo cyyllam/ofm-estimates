@@ -3,10 +3,19 @@ library(sparkline)
 
 rt_specific_col_def <- function() {
   custom_colDef <- list(
-    County = colDef(align = "left"),
-    Jurisdiction = colDef(align = "left", minWidth = 150),
+    County = colDef(align = "left",
+                    style = list(position = "sticky", left = 0, background = "#fff", zIndex = 1),
+                    headerStyle = list(position = "sticky", left = 0, background = "#fff", zIndex = 1)
+                    ),
+    Jurisdiction = colDef(align = "left", 
+                          minWidth = 150,
+                          style = list(position = "sticky", left = 100, background = "#fff", zIndex = 1),
+                          headerStyle = list(position = "sticky", left = 100, background = "#fff", zIndex = 1)
+                         ),
     Trendline = colDef(
       align = 'left',
+      style = list(position = "sticky", left = 250, background = "#fff", zIndex = 1),
+      headerStyle = list(position = "sticky", left = 250, background = "#fff", zIndex = 1),
       cell = function(values) {
         sparkline(values, type = "bar")
       }
