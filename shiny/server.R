@@ -189,6 +189,8 @@ server <- function(input, output, session) {
     if (nrow(t) > 0) {
       reactable(t,
                 searchable = T,
+                showSortable = T,
+                defaultSortOrder = "desc",
                 defaultPageSize = 20,
                 columnGroups = list(
                   colGroup(name = "Year", columns = cols)),

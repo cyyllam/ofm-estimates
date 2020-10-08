@@ -1,4 +1,4 @@
-fluidPage(#theme = "stylesheet.css",
+fluidPage(
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet.css")
   ),

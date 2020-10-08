@@ -3,16 +3,21 @@ library(sparkline)
 
 rt_specific_col_def <- function() {
   custom_colDef <- list(
-    County = colDef(align = "left",
-                    style = list(position = "sticky", left = 0, background = "#fff", zIndex = 1),
-                    headerStyle = list(position = "sticky", left = 0, background = "#fff", zIndex = 1)
+    County = colDef(
+      defaultSortOrder = "asc",
+      align = "left",
+      style = list(position = "sticky", left = 0, background = "#fff", zIndex = 1),
+      headerStyle = list(position = "sticky", left = 0, background = "#fff", zIndex = 1)
                     ),
-    Jurisdiction = colDef(align = "left", 
-                          minWidth = 150,
-                          style = list(position = "sticky", left = 100, background = "#fff", zIndex = 1),
-                          headerStyle = list(position = "sticky", left = 100, background = "#fff", zIndex = 1)
+    Jurisdiction = colDef(
+      defaultSortOrder = "asc",
+      align = "left", 
+      minWidth = 150,
+      style = list(position = "sticky", left = 100, background = "#fff", zIndex = 1),
+      headerStyle = list(position = "sticky", left = 100, background = "#fff", zIndex = 1)
                          ),
     Trendline = colDef(
+      sortable = F,
       align = 'left',
       style = list(position = "sticky", left = 250, background = "#fff", zIndex = 1),
       headerStyle = list(position = "sticky", left = 250, background = "#fff", zIndex = 1),
