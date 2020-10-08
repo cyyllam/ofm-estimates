@@ -7,7 +7,6 @@ fluidPage(#theme = "stylesheet.css",
     title = "OFM Estimates for the Central Puget Sound Region",
     id = "navbar",
     selected = "home",
-    # theme = "style.css",
     fluid = T,
 
 # tabs --------------------------------------------------------------------
