@@ -17,7 +17,7 @@ server <- function(input, output, session) {
   filter_data <- reactive({
     years <- input$tablr_year
     id_cols <- c("Filter", "County", "Jurisdiction")
-    
+
     d <- df %>% 
       arrange(year) %>% 
       filter(attr == input$tablr_attr,
@@ -75,7 +75,8 @@ server <- function(input, output, session) {
         pivot_wider(id_cols = all_of(id_cols),
                     names_from = year,
                     values_from = delta_share) %>% 
-        ungroup()
+        ungroup()%>% 
+        mutate(across(where(is.numeric), function(x) ifelse(is.infinite(x), 0, x)))
     }
     
     # create list column Trendline for sparkline htmlwidget
@@ -107,13 +108,13 @@ server <- function(input, output, session) {
   
   output$ui_tablr_main_table <- renderUI({
     display_note <- "Estimates other than Total Population are not yet available for years after 2010."
-    cities_note <- "Circles denote cities that rank in the top ten (of filtered results) for 
-    growth or absolute total. The top ten cities in decending order for a given year will have a hue progressing from dark to light."
+    cities_note <- "Circles denote cities that rank in the top ten of filtered results with 
+    hue progressing from dark to light when sorted in decending order for a given year."
     
     crit_a <- any(as.integer(input$tablr_year) > 2010) & (input$tablr_attr != "Total Population")
     crit_b <- all(as.integer(input$tablr_year) > 2010) & (input$tablr_attr != "Total Population")
     
-    disp_note_div <- p(display_note, class = "note")
+    disp_note_div <- div(p(display_note, class = "note"), class = "note-container")
     city_note_div <- p(cities_note, class = "long-note")
     
     if (input$tablr_juris == 4) {
@@ -122,20 +123,18 @@ server <- function(input, output, session) {
         disp_note_div
       } else if (crit_a) {
         div(
-          div(p(display_note, class = "long-note"), city_note_div, class = "note"),
+          div(p(display_note, class = "long-note"), city_note_div, class = "note-container"),
           reactableOutput("tablr_main_table")
         )
       } else {
         div(
-          div(city_note_div, class = "note"),
+          div(p(cities_note, class = "note"), class = "note-container"),
           reactableOutput("tablr_main_table")
         )
       }
       
     } else if (crit_b) {
-      
       disp_note_div
-      
     } else if (crit_a) {
       
       div(
@@ -157,7 +156,7 @@ server <- function(input, output, session) {
     
     t <- filter_data() %>% 
       select(!Filter)
-    
+    # if (input$tablr_attr == "GQ Population") {browser()}
     cols <- str_subset(colnames(t), "\\d{4}")
     
     if (input$tablr_report_type %in% c("Delta", "Delta Percent")) {
